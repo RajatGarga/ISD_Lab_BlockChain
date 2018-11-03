@@ -1,0 +1,15 @@
+package tests;
+
+import java.security.KeyPair;
+
+import utils.Crypto;
+
+public class KeyTest {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		KeyPair keys = Crypto.generateKeys();
+		
+	}
+
+}

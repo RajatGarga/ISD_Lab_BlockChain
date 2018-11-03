@@ -1,0 +1,119 @@
+package BlockChain;
+
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.gson.JsonArray;
+
+public class Block {
+	int height;
+	String timestamp;
+	JsonArray transactions;
+	String previousHash;
+	public int nonce;
+	String parent;
+	
+	public Block(String timestamp, JsonArray transactions, String previousHash) {
+		super();
+		this.height = -1;
+		this.timestamp = timestamp;
+		this.transactions = transactions;
+		this.previousHash = previousHash;
+		this.nonce = 0;
+		parent = null;
+	}
+	public Block(String timestamp, String previousHash) {
+		super();
+		this.height = -1;
+		this.timestamp = timestamp;
+		this.transactions = new JSONArray();
+		this.previousHash = previousHash;
+		this.nonce = 0;
+		parent = null;
+	}
+	public Block(String timestamp, JSONArray transactions, String previousHash, int nonce) {
+		super();
+		this.height = -1;
+		this.timestamp = timestamp;
+		this.transactions = transactions;
+		this.previousHash = previousHash;
+		this.nonce = nonce;
+		parent = null;
+	}
+	public static Block fromJSON(String obj) throws ParseException {
+		JSONObject jsonobj = (JSONObject) new JSONParser().parse(obj);
+		System.out.println(obj);
+		return new Block(
+				jsonobj.get("timestamp").toString(),
+				(JSONArray) jsonobj.get("transactions"),
+				jsonobj.get("previous_hash").toString(),
+				Integer.parseInt(jsonobj.get("nonce").toString())
+				);
+	}
+	
+	public void incNonce() {
+		this.nonce += 1;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void addTransaction(String transaction) {
+		transactions.add(transaction);
+	}
+	
+	public void setParent(String parent) {
+		this.parent = parent;
+		this.height += 1;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public String toJSON() {
+		JSONObject obj = new JSONObject();
+		obj.put("timestamp", this.timestamp);
+		obj.put("transactions", this.transactions.toJSONString());
+		obj.put("previous_hash", this.previousHash);
+		obj.put("nonce", Integer.toString(nonce));
+		return obj.toJSONString();
+	}
+	
+	public String hashBlock() {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+			byte[] hash = digest.digest(this.toJSON().getBytes("UTF-8"));
+//			return DatatypeConverter.printHexBinary(hash);
+			StringBuilder string = new StringBuilder();
+			for(byte b : hash) {
+				int val = b;
+				for(int i=0; i<8; i++) {
+					string.append((val & 128) == 0 ? 0 : 1);
+					val <<= 1;
+				}
+			}
+			return string.toString();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public boolean isvalid() {
+		String matchString = StringUtils.repeat("0", Constants.DIFFICULTY);
+		String subs = this.hashBlock().substring(0, Constants.DIFFICULTY);
+		if(subs.matches(matchString)) {
+			System.out.println("Block Valid with Hash : " + this.hashBlock());
+			return true;
+		}else {
+			return false;
+		}
+	}
+}

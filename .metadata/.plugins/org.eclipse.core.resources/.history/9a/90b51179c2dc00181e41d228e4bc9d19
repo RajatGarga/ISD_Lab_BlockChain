@@ -1,0 +1,51 @@
+package utils;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.util.Base64;
+
+public class Crypto {
+	
+	public static KeyPair generateKeys() {
+		KeyPair pair;
+		KeyPairGenerator keyGen;
+		SecureRandom ran;
+		try {
+			// Use a digital signature algorithm
+			keyGen = KeyPairGenerator.getInstance("DSA");
+			// Random algorithm is SHA-1
+			ran = SecureRandom.getInstance("SHA1PRNG");
+			ran.setSeed(System.currentTimeMillis());
+			keyGen.initialize(512, ran);
+			pair = keyGen.generateKeyPair();
+			return pair;
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static String getPrivateKeyasString(KeyPair pair) {
+		return Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded());
+	}
+	public static String getPublicKeyasString(KeyPair pair) {
+		return Base64.getEncoder().encodeToString(pair.getPublic().getEncoded());
+	}
+	public static byte[] loadKey(String key) {
+		return Base64.getDecoder().decode(key);
+	}
+	public static byte[] sign(String message, PrivateKey key) {
+		try {
+			Signature sig = Signature.getInstance("SHA1withDSA");
+			sig.initSign(key);
+			sig.update(message.getBytes());
+			return sig.sign()
+		}
+	}
+	
+}

@@ -1,0 +1,32 @@
+package BlockChain;
+
+import org.json.simple.JSONArray; 
+import org.json.simple.JSONObject;
+
+public class Transaction {
+	//public key of owner
+	String owner;
+	//public key of receiver
+	String receiver;
+	String coins;
+	String id;
+	String signature;
+	
+	public Transaction(String owner, String receiver, String coins, String id, String signature) {
+		super();
+		this.owner = owner;
+		this.receiver = receiver;
+		this.coins = coins;
+		this.id = id;
+		this.signature = signature;
+	}
+	
+	public boolean isSignatureValid() {
+		return false;
+	}
+	
+	public String toJSON() {
+		JSONObject json = new JSONObject();
+		
+	}
+}
