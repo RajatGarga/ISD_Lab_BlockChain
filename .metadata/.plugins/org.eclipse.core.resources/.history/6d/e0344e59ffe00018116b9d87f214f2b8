@@ -1,0 +1,116 @@
+package BlockChain;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
+public class BlockChain {
+	ArrayList<Block> blocks;
+	HashMap<String, Block> BlockLookup;
+	public Block head;
+	
+	public BlockChain(String jsonStr) {
+		super();
+		if (jsonStr == null) {
+			this.blocks = new ArrayList<Block>();
+			this.blocks.add(Block.getGenesis());
+			this.BlockLookup = new HashMap<String, Block>();
+		}
+		head = blocks.get(0);
+		for (Block b : blocks) {
+			this.BlockLookup.put(b.hashBlock(), b);
+			if(b.height > this.head.height) {
+				this.head = b;
+			}
+		}
+		for(Block b : blocks) {
+			if (b.previousHash != null) {
+				if(BlockLookup.containsKey(b.previousHash)) {
+					b.setParent(this.BlockLookup.get(b.previousHash));
+				}
+			}
+		}
+	}
+	
+	public int getWalletAmount(String address) {
+		int total = 0;
+		Block current = this.head;
+		while(current != null) {
+			Iterator<JsonElement> it = current.transactions.iterator();
+			while(it.hasNext()) {
+				Transaction transaction = Transaction.fromJSON(it.next().getAsString());
+				if(transaction.owner == address && transaction.receiver != address) {
+					total -= transaction.coins;
+				}else if(transaction.owner != address && transaction.receiver == address) {
+					total += transaction.coins;
+				}
+			}
+			current = current.parent;
+		}
+		return total;
+	}
+	
+	public Constants.addCode addBlock(Block block, boolean cheat) {
+		String blockHash = block.hashBlock();
+		if(this.BlockLookup.containsKey(blockHash)) {
+			return Constants.addCode.KNOWN_BLOCK;
+		}
+		if(!this.BlockLookup.containsKey(block.previousHash)) {
+			return Constants.addCode.NO_VALID_PARENT;
+		}
+		if(!block.isvalid()) {
+			return Constants.addCode.INVALID_PROOF_OF_WORK;
+		}
+		JsonArray transactions = block.transactions;
+		Iterator<JsonElement> it = transactions.iterator();
+		while(it.hasNext()) {
+			Transaction trans = Transaction.fromJSON(it.next().getAsString());
+			if(!.isSignatureValid()) {
+				return Constants.addCode.INVALID_SIGNATURE;
+			}
+		}
+		
+		Block current = this.head;
+		while(current != null) {
+			it = block.transactions.iterator();
+			while(it.hasNext()) {
+				if(current.transactions.contains(it.next())) {
+					return Constants.addCode.TRANSACTION_REPLAYED;
+				}
+			}
+			current = current.parent;
+		}
+		
+		it = block.transactions.iterator();
+		while(it.hasNext()) {
+			Transaction transaction = Transaction.fromJSON(it.next().getAsString());
+			if(transaction.coins<0) {
+				return Constants.addCode.AMOUNT_NEGATIVE;
+			}
+			int ownerCoins = this.getWalletAmount(transaction.owner);
+			if(ownerCoins < transaction.coins && !cheat) {
+				return Constants.addCode.NOT_ENOUGH_COINS;
+			}
+		}
+		this.BlockLookup.put(block.hashBlock(), block);
+		if(block.height > this.head.height) {
+			this.head = block;
+		}
+		return Constants.addCode.SUCCESS;
+	}
+	
+	public String toJSON() {
+		Gson gson = new Gson();
+		return gson.toJson(this);
+	}
+	
+	
+	
+	public BlockChain fromJSON(String jsonString) {
+		return new Gson().fromJson(jsonString, BlockChain.class);
+	}
+}

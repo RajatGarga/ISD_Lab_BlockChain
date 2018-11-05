@@ -1,12 +1,7 @@
 package tests;
 
 import java.security.KeyPair;
-import java.sql.Time;
-
-import org.apache.commons.lang3.StringUtils;
-
 import BlockChain.Block;
-import BlockChain.Constants;
 import BlockChain.Transaction;
 import utils.Crypto;
 
@@ -25,5 +20,4 @@ public class blockHashTest {
 		double time = (endtime-starttime)/1000.0;
 		System.out.println("Time taken = "+time);
 	}
-	
 }

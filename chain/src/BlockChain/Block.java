@@ -65,7 +65,6 @@ public class Block {
 		this.nonce += 1;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void addTransaction(String transaction) {
 		transactions.add(transaction);
 	}
@@ -75,6 +74,14 @@ public class Block {
 		this.height += 1;
 	}
 	
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
 	public String toJSON() {
 		JsonObject obj = new JsonObject();
 		obj.addProperty("timestamp", this.timestamp);
@@ -114,6 +121,26 @@ public class Block {
 		String subs = this.hashBlock().substring(0, Constants.DIFFICULTY);
 		if(subs.matches(matchString)) {
 			System.out.println("Block Valid with Hash : " + this.hashBlock());
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	public boolean mine() {
+		long start = System.currentTimeMillis();
+		int hashesDone = 0;
+		while(!this.isvalid()) {
+			hashesDone++;
+			this.incNonce();
+			if(hashesDone%300000 == 0) {
+				long end = System.currentTimeMillis();
+				double sec = (end-start)/1000.0;
+				System.out.println("Hash Rate : " + 300000/sec);
+				start = end;
+			}
+		}
+		if(this.isvalid()) {
 			return true;
 		}else {
 			return false;

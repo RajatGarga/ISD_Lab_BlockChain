@@ -5,16 +5,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 public class BlockChain {
 	ArrayList<Block> blocks;
 	HashMap<String, Block> BlockLookup;
-	Block head;
+	public Block head;
 	
 	public BlockChain(String jsonStr) {
 		super();
-		if (jsonStr != null) {
+		if (jsonStr == null) {
 			this.blocks = new ArrayList<Block>();
 			this.blocks.add(Block.getGenesis());
 			this.BlockLookup = new HashMap<String, Block>();
@@ -35,6 +36,24 @@ public class BlockChain {
 		}
 	}
 	
+	public void printBlocks() {
+		Iterator<Block> it = this.blocks.iterator();
+		String ret = "";
+		while(it.hasNext()) {
+			Block block = it.next();
+			System.out.println(block.toJSON());
+		}
+	}
+	public String getBlocks() {
+		Iterator<Block> it = this.blocks.iterator();
+		StringBuilder builder = new StringBuilder();
+		while(it.hasNext()) {
+			Block block = it.next();
+			builder.append("  <---->  ");
+			builder.append(block.toJSON());
+		}
+		return builder.toString();
+	}
 	public int getWalletAmount(String address) {
 		int total = 0;
 		Block current = this.head;
@@ -53,7 +72,7 @@ public class BlockChain {
 		return total;
 	}
 	
-	public Constants.addCode addBlock(Block block) {
+	public Constants.addCode addBlock(Block block, boolean cheat) {
 		String blockHash = block.hashBlock();
 		if(this.BlockLookup.containsKey(blockHash)) {
 			return Constants.addCode.KNOWN_BLOCK;
@@ -64,9 +83,11 @@ public class BlockChain {
 		if(!block.isvalid()) {
 			return Constants.addCode.INVALID_PROOF_OF_WORK;
 		}
-		Iterator<JsonElement> it = block.transactions.iterator();
+		JsonArray transactions = block.transactions;
+		Iterator<JsonElement> it = transactions.iterator();
 		while(it.hasNext()) {
-			if(!Transaction.fromJSON(it.next().getAsString()).isSignatureValid()) {
+			Transaction trans = Transaction.fromJSON(it.next().getAsString());
+			if(!trans.isSignatureValid()) {
 				return Constants.addCode.INVALID_SIGNATURE;
 			}
 		}
@@ -89,11 +110,12 @@ public class BlockChain {
 				return Constants.addCode.AMOUNT_NEGATIVE;
 			}
 			int ownerCoins = this.getWalletAmount(transaction.owner);
-			if(ownerCoins < transaction.coins) {
+			if(ownerCoins < transaction.coins && !cheat) {
 				return Constants.addCode.NOT_ENOUGH_COINS;
 			}
 		}
 		this.BlockLookup.put(block.hashBlock(), block);
+		this.blocks.add(block);
 		if(block.height > this.head.height) {
 			this.head = block;
 		}
@@ -104,6 +126,8 @@ public class BlockChain {
 		Gson gson = new Gson();
 		return gson.toJson(this);
 	}
+	
+	
 	
 	public BlockChain fromJSON(String jsonString) {
 		return new Gson().fromJson(jsonString, BlockChain.class);
