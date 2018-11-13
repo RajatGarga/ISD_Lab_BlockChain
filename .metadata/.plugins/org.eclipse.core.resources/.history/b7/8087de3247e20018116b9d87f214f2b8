@@ -1,0 +1,39 @@
+package tests;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.security.KeyPair;
+
+import utils.Crypto;
+
+public class filetest {
+	public static void main(String[] args) {
+		initVoters();
+	}
+	private static void initVoters() {
+		   //TODO Must have a separate endpoint and to be done well before the date of voting
+		   try {
+			   FileWriter fw = new FileWriter("myfile.csv");
+			   PrintWriter writer = new PrintWriter(fw);
+			    for(int i=0; i<10; i++) {
+			    	KeyPair key = Crypto.generateKeys();
+			    	writer.println(Crypto.getPrivateKeyasString(key)+","+Crypto.getPublicKeyasString(key)+"\n");
+			    }
+			    writer.close();
+			}
+			catch (IOException ex) {
+			    System.out.println("An error occured :: " + ex.getMessage());
+			}
+		   }
+	private static void loadVoters() {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader("myfile.csv"));
+		} catch (FileNotFoundException e) {
+			System.out.println("An error occured :: " + ex.getMessage());
+		}
+	}
+	}

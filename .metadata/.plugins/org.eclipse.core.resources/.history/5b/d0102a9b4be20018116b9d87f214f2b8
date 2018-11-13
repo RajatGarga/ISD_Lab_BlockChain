@@ -1,0 +1,18 @@
+package election;
+
+public class candidate {
+	String Name;
+
+	public candidate(String name) {
+		Name = name;
+	}
+
+	public String getName() {
+		return Name;
+	}
+
+	public void setName(String name) {
+		Name = name;
+	}
+	
+}

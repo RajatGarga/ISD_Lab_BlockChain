@@ -120,7 +120,7 @@ public class Block {
 		String matchString = StringUtils.repeat("0", Constants.DIFFICULTY);
 		String subs = this.hashBlock().substring(0, Constants.DIFFICULTY);
 		if(subs.matches(matchString)) {
-			System.out.println("Block Valid with Hash : " + this.hashBlock());
+			//System.out.println("Block Valid with Hash : " + this.hashBlock());
 			return true;
 		}else {
 			return false;

@@ -1,0 +1,6 @@
+package election;
+
+public class position {
+	String name;
+	int maxWinners;
+}

@@ -1,8 +1,8 @@
 package BlockChain;
 
 public class Constants {
-	public static final int DIFFICULTY = 18;
-	
+	//public static final int DIFFICULTY = 18;
+	public static final int DIFFICULTY = 6;
 	public enum addCode{
 		KNOWN_BLOCK,
 		NO_VALID_PARENT,

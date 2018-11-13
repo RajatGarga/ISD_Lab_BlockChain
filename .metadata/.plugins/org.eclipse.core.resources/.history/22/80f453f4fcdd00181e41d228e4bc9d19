@@ -1,5 +1,0 @@
-package BlockChain;
-
-public class Constants {
-	static final int DIFFICULTY = 10;
-}
