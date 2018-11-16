@@ -1,0 +1,83 @@
+package tests;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
+import BlockChain.Block;
+import BlockChain.BlockChain;
+import BlockChain.Transaction;
+import election.candidate;
+import election.position;
+import utils.general;
+
+public class httptest {
+	public static void main(String[] args) throws IOException{
+		URL url = new URL("http://localhost:8080/test?voter=1");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		int response_Code = conn.getResponseCode();
+		//System.out.println("Response code :: " + response_Code);
+		if(response_Code == HttpURLConnection.HTTP_OK) {
+			BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+			while((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+			JsonParser parser = new JsonParser();
+			JsonObject jsonObject = (JsonObject) parser.parse(response.toString());
+			if(response_Code == 200) {
+				//System.out.println("Public Key ::" + jsonObject.get("publicKey").getAsString());
+				//System.out.println("Private Key ::" + jsonObject.get("privateKey").getAsString());
+				JsonArray arr = parser.parse(jsonObject.get("positions").getAsString()).getAsJsonArray();
+				//System.out.println(arr.toString());
+				//System.out.println("Test Success!");
+				Iterator<JsonElement> it = arr.iterator();
+				
+				while(it.hasNext()) {
+					position pos = position.fromJSON(it.next().getAsString());
+					System.out.println("POSITION :: " + pos.getName());
+					ArrayList<candidate> can = pos.getCandidates();
+					for(int i=0; i<can.size(); i++) {
+						candidate candidate = can.get(i);
+						System.out.println(i + ". " + candidate.getName());
+					}
+				}
+				String publicKey = jsonObject.get("publicKey").getAsString();
+				String privateKey = jsonObject.get("privateKey").getAsString();
+				BlockChain chain = BlockChain.fromJSON(jsonObject.get("chain").getAsString());
+				Block block = new Block(general.getTimeStamp(), chain.head.hashBlock());
+				it = arr.iterator();
+				while(it.hasNext()) {
+					position pos = position.fromJSON(it.next().getAsString());
+					int maxPos = pos.getMaxWinners();
+					ArrayList<candidate> can = pos.getCandidates();
+					for(int i=1; i<=pos.getMaxWinners(); i++) {
+						System.out.println("Select your vote number : " + i);
+						int n = Integer.parseInt(System.console().readLine());
+						candidate cand = can.get(n);
+						Transaction tran = new Transaction(publicKey, cand.getPublicKey(), maxPos--, general.getTimeStamp());
+						tran.sign(privateKey);
+					}
+				}
+			}else {
+				System.out.println("Test Failed!");
+			}
+		}else {
+			System.out.println("HTTP Failure");
+		}
+	}
+}

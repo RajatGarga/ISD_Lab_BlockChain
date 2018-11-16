@@ -109,7 +109,6 @@ public class testServ extends HttpServlet {
 	    	it.next();
 	    	i++;
 	    }
-	    Gson gs = new Gson();
 	    String sk = it.next();
 		json.addProperty("success", "true");
 		json.addProperty("privateKey", sk);
@@ -125,19 +124,24 @@ public class testServ extends HttpServlet {
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("application/json");
-		PrintWriter out = response.getWriter();
+		
 		String object = request.getParameter("block");
 		Block block = Block.fromJSON(object);
 		JsonObject json = new JsonObject();
 		Constants.addCode code = chain.addBlock(block, false);
+		System.out.println("Got Post!");
 		if( code == Constants.addCode.SUCCESS) {
 			json.addProperty("success", "true");
 			json.addProperty("message", "Successfuly added block");
+			System.out.println("Successfuly added bloc!");
 		}else {
 			json.addProperty("success", "false");
 			json.addProperty("message", code.toString());
 			json.addProperty("chain", chain.toJSON());
+			System.out.println(code.toString());
 		}
+		PrintWriter out = response.getWriter();
+		out.println(json.toString());
 	}
 
 	public void destroy() {

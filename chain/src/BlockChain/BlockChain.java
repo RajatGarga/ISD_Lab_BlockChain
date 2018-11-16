@@ -55,15 +55,17 @@ public class BlockChain {
 		return builder.toString();
 	}
 	public int getWalletAmount(String address) {
+		//System.out.println("Rec Got: " +address);
 		int total = 0;
 		Block current = this.head;
 		while(current != null) {
 			Iterator<JsonElement> it = current.transactions.iterator();
 			while(it.hasNext()) {
 				Transaction transaction = Transaction.fromJSON(it.next().getAsString());
-				if(transaction.owner == address && transaction.receiver != address) {
+				//System.out.println("Rec Fot: "+transaction.receiver);
+				if(transaction.owner.equals(address) && !transaction.receiver.equals(address)) {
 					total -= transaction.coins;
-				}else if(transaction.owner != address && transaction.receiver == address) {
+				}else if(!transaction.owner.equals(address) && transaction.receiver.equals(address)) {
 					total += transaction.coins;
 				}
 			}
@@ -110,14 +112,20 @@ public class BlockChain {
 				return Constants.addCode.AMOUNT_NEGATIVE;
 			}
 			int ownerCoins = this.getWalletAmount(transaction.owner);
+			System.out.println("OWNER HAS :: " + ownerCoins + " || Transaction has :: " + transaction.coins);
 			if(ownerCoins < transaction.coins && !cheat) {
 				return Constants.addCode.NOT_ENOUGH_COINS;
 			}
 		}
+		block.setParent(this.BlockLookup.get(block.previousHash));
 		this.BlockLookup.put(block.hashBlock(), block);
 		this.blocks.add(block);
-		if(block.height > this.head.height) {
+		int blockHeight = block.getHeight();
+		int chainHeight = this.head.getHeight();
+		System.out.println("BH : " + blockHeight + " || CH : " + chainHeight);
+		if(blockHeight > chainHeight) {
 			this.head = block;
+			System.out.println("New Head!");
 		}
 		return Constants.addCode.SUCCESS;
 	}
@@ -129,7 +137,7 @@ public class BlockChain {
 	
 	
 	
-	public BlockChain fromJSON(String jsonString) {
+	public static BlockChain fromJSON(String jsonString) {
 		return new Gson().fromJson(jsonString, BlockChain.class);
 	}
 }

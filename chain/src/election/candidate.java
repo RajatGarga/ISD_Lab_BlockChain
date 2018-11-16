@@ -19,10 +19,6 @@ public class candidate {
 		return publicKey;
 	}
 
-	public String getPrivateKey() {
-		return privateKey;
-	}
-
 	public String getName() {
 		return Name;
 	}

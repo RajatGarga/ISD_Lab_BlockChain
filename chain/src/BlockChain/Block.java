@@ -53,12 +53,14 @@ public class Block {
 	public static Block fromJSON(String obj) {
 		JsonParser parser = new JsonParser();
 		JsonObject jsonObject = (JsonObject) parser.parse(obj);
-		return new Block(
+		Block bk = new Block(
 				jsonObject.get("timestamp").getAsString(),
 				parser.parse(jsonObject.get("transactions").toString()).getAsJsonArray(),
 				jsonObject.get("previous_hash").getAsString(),
 				Integer.parseInt(jsonObject.get("nonce").getAsString())
 				);
+		bk.setHeight(Integer.parseInt(jsonObject.get("height").getAsString()));
+		return bk;
 	}
 	
 	public void incNonce() {
@@ -88,6 +90,7 @@ public class Block {
 		obj.add("transactions", this.transactions);
 		obj.addProperty("previous_hash", this.previousHash);
 		obj.addProperty("nonce", Integer.toString(nonce));
+		obj.addProperty("height", Integer.toString(height));
 		return obj.toString();
 	}
 	
