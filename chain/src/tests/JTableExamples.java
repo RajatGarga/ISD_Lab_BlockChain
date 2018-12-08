@@ -2,13 +2,15 @@ package tests;
 
 import javax.swing.JFrame; 
 import javax.swing.JScrollPane; 
-import javax.swing.JTable; 
+import javax.swing.JTable;
+import javax.swing.JCheckBox;
+import javax.swing.JButton;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent; 
   
 public class JTableExamples { 
     // frame 
     JFrame f; 
-    // Table 
-    JTable j; 
   
     // Constructor 
     JTableExamples() 
@@ -17,7 +19,7 @@ public class JTableExamples {
         f = new JFrame(); 
   
         // Frame Title 
-        f.setTitle("JTable Example"); 
+        f.setTitle("Confirm!"); 
   
         // Data to be displayed in the JTable 
         String[][] data = { 
@@ -26,17 +28,19 @@ public class JTableExamples {
         }; 
   
         // Column Names 
-        String[] columnNames = { "Name", "Roll Number", "Department" }; 
-  
-        // Initializing the JTable 
-        j = new JTable(data, columnNames); 
-        j.setBounds(30, 40, 200, 300); 
-  
-        // adding it to JScrollPane 
-        JScrollPane sp = new JScrollPane(j); 
-        f.add(sp); 
+        String[] columnNames = { "Name", "Roll Number", "Department" };
         // Frame Size 
         f.setSize(500, 200); 
+        f.getContentPane().setLayout(null);
+        
+        JButton btnSubmit = new JButton("SUBMIT");
+        btnSubmit.addMouseListener(new MouseAdapter() {
+        	@Override
+        	public void mouseClicked(MouseEvent arg0) {
+        	}
+        });
+        btnSubmit.setBounds(211, 64, 78, 26);
+        f.getContentPane().add(btnSubmit);
         // Frame Visible = true 
         f.setVisible(true); 
     } 

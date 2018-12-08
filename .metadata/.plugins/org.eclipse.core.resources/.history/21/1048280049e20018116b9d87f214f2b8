@@ -1,7 +1,0 @@
-package election;
-
-public class position {
-	String name;
-	int maxWinners;
-	List<Candidate> candidates = new List<Candidate>();
-}
